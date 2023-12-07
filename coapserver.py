@@ -12,7 +12,6 @@ class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
         CoAP.__init__(self, (host, port), multicast)
         
-
         print("CoAP Server start on " + host + ":" + str(port))
         print(self.root.dump())
 

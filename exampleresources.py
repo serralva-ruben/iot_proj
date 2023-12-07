@@ -5,9 +5,6 @@ from coapthon import defines
 
 from coapthon.resources.resource import Resource
 
-__author__ = 'Giacomo Tanganelli'
-
-
 class BasicResource(Resource):
     def __init__(self, name="BasicResource", coap_server=None):
         super(BasicResource, self).__init__(name, coap_server, visible=True,
