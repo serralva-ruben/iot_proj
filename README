@@ -1,0 +1,16 @@
+Looking at your code, it seems like you're on the right track. Here are some suggestions based on your current implementation and the project requirements:
+
+1. **Server Side (Python with CoAP):**
+   - Your CoAP server implementation looks good. You've created a server that exposes resources for SmartCar1 and SmartBus13.
+   - However, it's not clear from the code you've shared how the resource values are being stored in MongoDB. You'll need to ensure that every time a resource value changes, it's updated in the database. You can use the PyMongo driver to interact with MongoDB from your Python code.
+
+2. **Client Application (Python with CoAP):**
+   - Your client application correctly subscribes to the 'ResDir2' resource and sets up a callback function to handle notifications.
+   - In the callback function, you check if the payload of the response is "Bus", and if so, you subscribe to the bus. This is in line with the project requirements.
+   - However, you'll need to ensure that the subscription to the bus is cancelled after 10 minutes, as per the project requirements. You can do this by adding a check in your `subscribe_to_bus` function to unsubscribe from the bus if 10 minutes have passed since the subscription was made.
+
+Remember, this is just a high-level review based on the code you've shared. The actual implementation might require additional steps and considerations based on your specific requirements. Also, please ensure to follow best practices for coding, data storage, and communication protocols to ensure the security and efficiency of your application. Good luck with your project! If you have any more questions or need further clarification, feel free to ask. 
+
+based on the project requirements, you would need two separate CoAP servers: one for SmartCar1 and another for SmartBus13. Each server would handle the resources related to its respective vehicle.
+
+As for the Resource Directory (ResDir2), it’s essentially a server that keeps track of the resources available on other servers. In your case, it would keep track of the vehicles (SmartCar1 and SmartBus13) when they enter Zone A. Here’s a basic implementation of a Resource Directory in Python using CoAPthon:
