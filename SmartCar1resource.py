@@ -48,14 +48,3 @@ class SmartCar1Resource(Resource):
         self.smartcar1_collection.delete_one({"name": "SmartCar1"})
         return True
 
-smartcar1 = SmartCar1Resource()
-
-def update_resource_value(resource):
-    while True:
-        # Update resource value here
-        resource.payload = get_new_value()  # Replace with your own method to get a new value
-        resource.updated_state()  # Notify observers about the change
-        time.sleep(60)  # Sleep for 60 seconds
-
-# Start a new thread that updates the resource value every 60 seconds
-threading.Thread(target=update_resource_value, args=(smartcar1,)).start()

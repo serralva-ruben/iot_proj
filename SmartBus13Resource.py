@@ -16,7 +16,7 @@ class SmartBusResource(Resource):
         self.vehicle_type = "Bus"  # Or get this value from MongoDB
 
         # MongoDB setup
-        self.client = MongoClient('localhost', 27017)  # Update with your MongoDB details
+        self.client = MongoClient('cluster0.mvvn0gh.mongodb.net', 27017)  # Update with your MongoDB details
         self.db = self.client['iot_project']
         self.smartbus_collection = self.db['smartbus_collection']
 
@@ -49,16 +49,4 @@ class SmartBusResource(Resource):
         self.smartbus_collection.delete_one({"bus_id": self.bus_id})
         return True
 
-smartbus1 = SmartBusResource(1)
-smartbus2 = SmartBusResource(2)
 
-def update_resource_value(resource):
-    while True:
-        # Update resource value here
-        resource.payload = get_new_value()  # Replace with your own method to get a new value
-        resource.updated_state()  # Notify observers about the change
-        time.sleep(60)  # Sleep for 60 seconds
-
-# Start a new thread that updates the resource value every 60 seconds
-threading.Thread(target=update_resource_value, args=(smartbus1,)).start()
-threading.Thread(target=update_resource_value, args=(smartbus2,)).start()

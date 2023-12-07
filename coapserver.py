@@ -3,7 +3,8 @@
 import getopt
 import sys
 from coapthon.server.coap import CoAP
-from exampleresources import BasicResource, Long, Separate, Storage, Big, JSONResource
+from SmartBus13Resource import SmartBusResource
+from SmartCar1resource import SmartCar1Resource
 
 __author__ = 'Giacomo Tanganelli'
 
@@ -11,6 +12,9 @@ __author__ = 'Giacomo Tanganelli'
 class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
         CoAP.__init__(self, (host, port), multicast)
+        self.add_resource('SmartBus1/', SmartBusResource(1))
+        self.add_resource('SmartBus2/', SmartBusResource(2))
+        self.add_resource('SmartCar1/', SmartCar1Resource(1))
         
         print("CoAP Server start on " + host + ":" + str(port))
         print(self.root.dump())
