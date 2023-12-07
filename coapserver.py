@@ -11,12 +11,7 @@ __author__ = 'Giacomo Tanganelli'
 class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
         CoAP.__init__(self, (host, port), multicast)
-        self.add_resource('basic/', BasicResource())
-        self.add_resource('storage/', Storage())
-        self.add_resource('separate/', Separate())
-        self.add_resource('long/', Long())
-        self.add_resource('big/nancy/', Big())
-        self.add_resource('nancy/', JSONResource())
+        
 
         print("CoAP Server start on " + host + ":" + str(port))
         print(self.root.dump())
