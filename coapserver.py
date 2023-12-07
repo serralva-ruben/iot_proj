@@ -6,9 +6,6 @@ from coapthon.server.coap import CoAP
 from SmartBus13Resource import SmartBusResource
 from SmartCar1resource import SmartCar1Resource
 
-__author__ = 'Giacomo Tanganelli'
-
-
 class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
         CoAP.__init__(self, (host, port), multicast)
