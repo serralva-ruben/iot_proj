@@ -16,7 +16,7 @@ class SmartBusResource(Resource):
         self.vehicle_type = "Bus"  # Or get this value from MongoDB
 
         # MongoDB setup
-        self.client = MongoClient('cluster0.mvvn0gh.mongodb.net', 27017)  # Update with your MongoDB details
+        self.client = MongoClient('mongodb+srv://rubenserralva:rubenserralva@cluster0.dlovykt.mongodb.net/?retryWrites=true&w=majority', 27017)  # Update with your MongoDB details
         self.db = self.client['iot_project']
         self.smartbus_collection = self.db['smartbus_collection']
 
