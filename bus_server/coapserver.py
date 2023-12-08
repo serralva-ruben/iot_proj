@@ -3,12 +3,12 @@
 import getopt
 import sys
 from coapthon.server.coap import CoAP
-from bus_server.SmartBus13Resources import SmartBusResource
+from SmartBus13Resources import SmartBusResources
 
 class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
         CoAP.__init__(self, (host, port), multicast)
-        self.add_resource('SmartBus1/', SmartBusResource(1))
+        self.add_resource('SmartBus1/', SmartBusResources(1))
         
         print("CoAP Server start on " + host + ":" + str(port))
         print(self.root.dump())

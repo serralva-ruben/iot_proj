@@ -1,50 +1,45 @@
 from coapthon.resources.resource import Resource
-from pymongo import MongoClient
-from datetime import datetime, timedelta
-import threading
-import time
+import requests
 
-class SmartCar1Resource(Resource):
+class SmartCar1Resources(Resource):
     def __init__(self, name="SmartCar1Resource", coap_server=None):
-        super(SmartCar1Resource, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
-        self.payload = "SmartCar1 Resource"
-        self.resource_type = "rt1"
+        super(SmartCar1Resources, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
+        self.payload = "SmartCar1 Initial Data"
+        self.resource_type = "SmartCar1Resource"
         self.content_type = "text/plain"
-        self.interface_type = "if1"
-        self.timestamp = datetime.now()
-        self.vehicle_type = "Car"  # Or get this value from MongoDB
-
-        # MongoDB setup
-        self.client = MongoClient('mongodb+srv://ruben:1234@cluster0.dlovykt.mongodb.net/?retryWrites=true&w=majority', 27017)  # Update with your MongoDB details
-        self.db = self.client['iot_project']
-        self.smartcar1_collection = self.db['smartcar1_collection']
+        self.location = "Unknown"
+        self.in_zone_a = False
 
     def render_GET(self, request):
-        # Check if the resource representation has expired
-        if datetime.now() - self.timestamp > timedelta(minutes=10):
-            return None  # Or however you want to handle expired resources
-
-        # Retrieve data from MongoDB and update the payload
-        smartcar1_data = self.smartcar1_collection.find_one({"name": "SmartCar1"})
-        if smartcar1_data:
-            self.payload = "Location: {}".format(smartcar1_data.get("location", "Unknown"))
+        # Return the current state of the car
+        self.payload = f"Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
         return self
 
     def render_PUT(self, request):
-        # Update the location of SmartCar1 in MongoDB based on the received payload
-        new_location = request.payload
-        self.smartcar1_collection.update_one({"name": "SmartCar1"}, {"$set": {"location": new_location}})
-        self.timestamp = datetime.now()  # Update timestamp
+        # Assuming the request payload is a dictionary
+        self.location = request.payload.get('location', self.location)
+        new_in_zone_a = request.payload.get('in_zone_a', self.in_zone_a)
+        
+        if new_in_zone_a != self.in_zone_a:
+            self.in_zone_a = new_in_zone_a
+            self.update_resdir2(self.in_zone_a)
+
+        self.payload = f"Updated Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
         return self
 
-    def render_POST(self, request):
-        # Create a new SmartCar1 resource in MongoDB
-        initial_details = request.payload
-        self.smartcar1_collection.insert_one({"name": "SmartCar1", "details": initial_details, "location": "Unknown"})
-        return self
-
-    def render_DELETE(self, request):
-        # Delete the SmartCar1 resource from MongoDB
-        self.smartcar1_collection.delete_one({"name": "SmartCar1"})
-        return True
-
+    def update_resdir2(self, in_zone_a):
+        if in_zone_a:
+            registration_data = {
+                "vehicle_id": self.name,
+                "location": self.location,
+            }
+            # URL of the ResDir2 registration endpoint
+            resdir2_url = "http://127.0.0.1:5000/register"
+            try:
+                response = requests.put(resdir2_url, json=registration_data)
+                if response.status_code == 200:
+                    print(f"Successfully registered {self.name} to ResDir2")
+                else:
+                    print(f"Failed to register {self.name} to ResDir2: {response.text}")
+            except requests.RequestException as e:
+                print(f"Error communicating with ResDir2: {e}")
