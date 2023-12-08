@@ -3,7 +3,7 @@
 import getopt
 import sys
 from coapthon.server.coap import CoAP
-from SmartBus13Resource import SmartBusResource
+from bus_server.SmartBus13Resources import SmartBusResource
 
 class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
