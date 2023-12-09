@@ -1,0 +1,11 @@
+0. Database Integration: You mentioned that all values of all resources must be stored in a MongoDB database. However, I don’t see any code related to MongoDB in the scripts you provided. You’ll need to add code to connect to your MongoDB database and store resource values in it.
+
+1. CoAP Integration: Your project description mentions that the interactions should be done using the CoAP protocol, but your ResourceDirectory2.py script is using HTTP. You might need to modify your script to use CoAP instead of HTTP.
+
+2. Subscription Mechanism: Your application needs to subscribe to ResDir2 to receive notifications of any new vehicles entering Zone A. You’ll need to implement this subscription mechanism.
+
+3. User Interfaces: You mentioned that you need to use Node-RED to create two user interfaces. This will likely involve writing some JavaScript code and designing some UI elements.
+
+4. Error Handling: It’s always a good idea to add error handling code to make your application more robust. For example, what should your application do if it fails to register a resource with ResDir2?
+
+5. Testing: Once you’ve implemented the above points, you should thoroughly test your application to ensure it works as expected. Make sure to test all possible scenarios, including edge cases and error conditions.
