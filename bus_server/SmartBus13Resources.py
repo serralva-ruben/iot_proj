@@ -1,6 +1,9 @@
 from coapthon.resources.resource import Resource
 import requests
 
+ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates
+ZONEA_RADIUS = 5 #km
+
 class SmartBus13Resources(Resource):
     def __init__(self, name="SmartBus13Resource", coap_server=None):
         super(SmartBus13Resources, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
@@ -17,11 +20,13 @@ class SmartBus13Resources(Resource):
 
     def render_PUT(self, request):
         # Assuming the request payload is a dictionary
-        self.location = geolocator.reverse(request.payload.get('location', self.location))
+        self.location = request.payload.get('location', self.location)
         
-        if self.location.address.split(",")[4].strip()==ZONEA_NAME:
+        if is_inside_area(self.location, ZONEA_Center, ZONEA_RADIUS):
             self.in_zone_a = True
             self.update_resdir2(self.in_zone_a)
+        else:
+            self.in_zone_a = False
 
         self.payload = f"Updated Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
         return self
@@ -39,3 +44,21 @@ class SmartBus13Resources(Resource):
 
             except Exception as e:
                 print(f"Error communicating with ResDir2: {e}")
+
+def is_inside_area(location, area_center, radius):
+    R = 6371.0
+
+    lat1 = radians(location[0])
+    lon1 = radians(location[1])
+    lat2 = radians(area_center[0])
+    lon2 = radians(area_center[1])
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+
+    return distance <= radius

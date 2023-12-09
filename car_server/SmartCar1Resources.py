@@ -1,8 +1,8 @@
 from coapthon.resources.resource import Resource
-from geopy.geocoders import Nominatim
-import requests
+from math import radians, cos, sin, sqrt, atan2
 
-ZONEA_NAME = 'Canton Luxembourg'
+ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates
+ZONEA_RADIUS = 5 #km
 
 class SmartCar1Resources(Resource):
     def __init__(self, name="SmartCar1Resource", coap_server=None):
@@ -21,11 +21,13 @@ class SmartCar1Resources(Resource):
 
     def render_PUT(self, request):
         # Assuming the request payload is a dictionary
-        self.location = geolocator.reverse(request.payload.get('location', self.location))
+        self.location = request.payload.get('location', self.location)
         
-        if self.location.address.split(",")[4].strip()==ZONEA_NAME:
+        if is_inside_area(self.location, ZONEA_Center, ZONEA_RADIUS):
             self.in_zone_a = True
             self.update_resdir2(self.in_zone_a)
+        else:
+            self.in_zone_a = False
 
         self.payload = f"Updated Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
         return self
@@ -43,3 +45,21 @@ class SmartCar1Resources(Resource):
 
             except Exception as e:
                 print(f"Error communicating with ResDir2: {e}")
+
+def is_inside_area(location, area_center, radius):
+    R = 6371.0
+
+    lat1 = radians(location[0])
+    lon1 = radians(location[1])
+    lat2 = radians(area_center[0])
+    lon2 = radians(area_center[1])
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+
+    return distance <= radius
