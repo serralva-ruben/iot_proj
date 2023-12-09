@@ -12,7 +12,7 @@ class ResDir2CoAPServer(CoAP):
         self.add_resource('register/', vehicle_registration_resource)
 
 def main():
-    server = ResDir2CoAPServer("0.0.0.0", 5683)
+    server = ResDir2CoAPServer("127.0.0.1", 5685)
     try:
         server.listen(10)
     except KeyboardInterrupt:
