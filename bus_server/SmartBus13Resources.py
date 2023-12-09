@@ -14,7 +14,7 @@ class SmartBus13Resources(Resource):
         # Return the current state of the bus
         self.payload = f"Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
         return self
-        
+
     def render_PUT(self, request):
         # Assuming the request payload is a dictionary
         self.location = geolocator.reverse(request.payload.get('location', self.location))
@@ -34,7 +34,7 @@ class SmartBus13Resources(Resource):
             }
 
             try:
-                client = HelperClient(server=('127.0.0.1', 5683))
+                client = HelperClient(server=('127.0.0.1', 5685))
                 client.put("register", payload=str(registration_data), timeout=10)
 
             except Exception as e:

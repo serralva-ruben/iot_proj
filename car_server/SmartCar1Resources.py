@@ -36,13 +36,10 @@ class SmartCar1Resources(Resource):
                 "vehicle_id": self.name,
                 "location": self.location,
             }
-            # URL of the ResDir2 registration endpoint
-            resdir2_url = "http://127.0.0.1:5000/register"
+
             try:
-                response = requests.put(resdir2_url, json=registration_data)
-                if response.status_code == 200:
-                    print(f"Successfully registered {self.name} to ResDir2")
-                else:
-                    print(f"Failed to register {self.name} to ResDir2: {response.text}")
-            except requests.RequestException as e:
+                client = HelperClient(server=('127.0.0.1', 5685))
+                client.put("register", payload=str(registration_data), timeout=10)
+
+            except Exception as e:
                 print(f"Error communicating with ResDir2: {e}")
