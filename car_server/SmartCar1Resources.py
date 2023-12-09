@@ -1,5 +1,8 @@
 from coapthon.resources.resource import Resource
-import requests
+from geopy.geocoders import Nominatim
+from coapthon.client.helperclient import HelperClient
+
+ZONEA_NAME = 'Canton Luxembourg'
 
 class SmartCar1Resources(Resource):
     def __init__(self, name="SmartCar1Resource", coap_server=None):
@@ -9,6 +12,7 @@ class SmartCar1Resources(Resource):
         self.content_type = "text/plain"
         self.location = "Unknown"
         self.in_zone_a = False
+        self.geolocator = Nominatim(user_agent="carResource")
 
     def render_GET(self, request):
         # Return the current state of the car
@@ -17,11 +21,10 @@ class SmartCar1Resources(Resource):
 
     def render_PUT(self, request):
         # Assuming the request payload is a dictionary
-        self.location = request.payload.get('location', self.location)
-        new_in_zone_a = request.payload.get('in_zone_a', self.in_zone_a)
+        self.location = geolocator.reverse(request.payload.get('location', self.location))
         
-        if new_in_zone_a != self.in_zone_a:
-            self.in_zone_a = new_in_zone_a
+        if self.location.address.split(",")[4].strip()==ZONEA_NAME:
+            self.in_zone_a = True
             self.update_resdir2(self.in_zone_a)
 
         self.payload = f"Updated Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
