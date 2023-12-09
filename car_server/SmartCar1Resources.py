@@ -1,6 +1,6 @@
 from coapthon.resources.resource import Resource
 from geopy.geocoders import Nominatim
-from coapthon.client.helperclient import HelperClient
+import requests
 
 ZONEA_NAME = 'Canton Luxembourg'
 
@@ -13,7 +13,6 @@ class SmartCar1Resources(Resource):
         self.location = "Unknown"
         self.in_zone_a = False
         self.geolocator = Nominatim(user_agent="carResource")
-        self.geolocator = Nominatim(user_agent="carResource")
 
     def render_GET(self, request):
         # Return the current state of the car
@@ -23,10 +22,7 @@ class SmartCar1Resources(Resource):
     def render_PUT(self, request):
         # Assuming the request payload is a dictionary
         self.location = geolocator.reverse(request.payload.get('location', self.location))
-        self.location = geolocator.reverse(request.payload.get('location', self.location))
         
-        if self.location.address.split(",")[4].strip()==ZONEA_NAME:
-            self.in_zone_a = True
         if self.location.address.split(",")[4].strip()==ZONEA_NAME:
             self.in_zone_a = True
             self.update_resdir2(self.in_zone_a)
@@ -40,10 +36,13 @@ class SmartCar1Resources(Resource):
                 "vehicle_id": self.name,
                 "location": self.location,
             }
-
+            # URL of the ResDir2 registration endpoint
+            resdir2_url = "http://127.0.0.1:5000/register"
             try:
-                client = HelperClient(server=('127.0.0.1', 5683))
-                client.put("register", payload=str(registration_data), timeout=10)
-
-            except Exception as e:
+                response = requests.put(resdir2_url, json=registration_data)
+                if response.status_code == 200:
+                    print(f"Successfully registered {self.name} to ResDir2")
+                else:
+                    print(f"Failed to register {self.name} to ResDir2: {response.text}")
+            except requests.RequestException as e:
                 print(f"Error communicating with ResDir2: {e}")
