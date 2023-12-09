@@ -2,6 +2,7 @@ from math import atan2, cos, radians, sin, sqrt
 from coapthon.resources.resource import Resource
 from coapthon.client.helperclient import HelperClient
 import requests
+import json
 
 ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates
 ZONEA_RADIUS = 5 #km
@@ -11,10 +12,9 @@ class SmartCar1Resources(Resource):
         super(SmartCar1Resources, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
         self.payload = "SmartCar1 Initial Data"
         self.resource_type = "SmartCar1Resource"
-        self.content_type = "text/plain"
+        self.content_type = "application/json"
         self.location = "Unknown"
         self.in_zone_a = False
-        self.geolocator = Nominatim(user_agent="carResource")
 
     def render_GET(self, request):
         # Return the current state of the car
@@ -22,8 +22,15 @@ class SmartCar1Resources(Resource):
         return self
 
     def render_PUT(self, request):
-        # Assuming the request payload is a dictionary
-        self.location = request.payload.get('location', self.location)
+        # Parse the JSON string payload into a Python dictionary
+        try:
+            request_payload = json.loads(request.payload)
+        except json.JSONDecodeError:
+            # Handle the exception if the payload is not a valid JSON
+            return self
+        
+        self.name = request_payload.get('name', self.name)
+        self.location = request_payload.get('location', self.location)
         
         if is_inside_area(self.location, ZONEA_Center, ZONEA_RADIUS):
             self.in_zone_a = True
@@ -32,6 +39,7 @@ class SmartCar1Resources(Resource):
             self.in_zone_a = False
 
         self.payload = f"Updated Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
+
         return self
 
     def update_resdir2(self, in_zone_a):
@@ -42,9 +50,13 @@ class SmartCar1Resources(Resource):
             }
 
             try:
-                client = HelperClient(server=('127.0.0.1', 5685))
-                client.put("register", payload=str(registration_data), timeout=10)
+                # Convert the registration data to a JSON string
+                registration_data_json = json.dumps(registration_data)
 
+                client = HelperClient(server=('127.0.0.1', 5685))
+                response = client.put("register", payload=registration_data_json, timeout=10)
+                print(f"Response from ResDir2: {response.pretty_print()}")
+                client.stop()
             except Exception as e:
                 print(f"Error communicating with ResDir2: {e}")
 

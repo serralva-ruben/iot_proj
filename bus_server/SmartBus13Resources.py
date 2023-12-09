@@ -1,4 +1,6 @@
+import json
 from math import atan2, cos, radians, sin, sqrt
+import paho.mqtt.publish as publish
 from coapthon.resources.resource import Resource
 from coapthon.client.helperclient import HelperClient
 import requests
@@ -11,7 +13,7 @@ class SmartBus13Resources(Resource):
         super(SmartBus13Resources, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
         self.payload = "SmartBus13 Initial Data"
         self.resource_type = "SmartBus13Resource"
-        self.content_type = "text/plain"
+        self.content_type = "application/json"
         self.location = "Unknown"
         self.in_zone_a = False
 
@@ -21,8 +23,16 @@ class SmartBus13Resources(Resource):
         return self
 
     def render_PUT(self, request):
-        # Assuming the request payload is a dictionary
-        self.location = request.payload.get('location', self.location)
+        # Parse the JSON string payload into a Python dictionary
+        try:
+            request_payload = json.loads(request.payload)
+        except json.JSONDecodeError:
+            # Handle the exception if the payload is not a valid JSON
+            return self
+    
+
+        self.name = request_payload.get('name', self.name)
+        self.location = request_payload.get('location', self.location)
         
         if is_inside_area(self.location, ZONEA_Center, ZONEA_RADIUS):
             self.in_zone_a = True
@@ -30,7 +40,11 @@ class SmartBus13Resources(Resource):
         else:
             self.in_zone_a = False
 
-        self.payload = f"Updated Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
+        # MQTT Notification
+        mqtt_topic = "bus13/location"
+        mqtt_message = json.dumps({"name": self.name, "status": "entered_zone_a", "location": self.location})
+        publish.single(mqtt_topic, payload=mqtt_message, hostname="localhost")
+
         return self
 
     def update_resdir2(self, in_zone_a):
@@ -41,9 +55,13 @@ class SmartBus13Resources(Resource):
             }
 
             try:
-                client = HelperClient(server=('127.0.0.1', 5685))
-                client.put("register", payload=str(registration_data), timeout=10)
+                # Convert the registration data to a JSON string
+                registration_data_json = json.dumps(registration_data)
 
+                client = HelperClient(server=('127.0.0.1', 5685))
+                response = client.put("register", payload=registration_data_json, timeout=10)
+                print(f"Response from ResDir2: {response.pretty_print()}")
+                client.stop()
             except Exception as e:
                 print(f"Error communicating with ResDir2: {e}")
 
