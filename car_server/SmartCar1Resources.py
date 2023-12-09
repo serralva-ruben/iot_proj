@@ -13,6 +13,7 @@ class SmartCar1Resources(Resource):
         self.location = "Unknown"
         self.in_zone_a = False
         self.geolocator = Nominatim(user_agent="carResource")
+        self.geolocator = Nominatim(user_agent="carResource")
 
     def render_GET(self, request):
         # Return the current state of the car
@@ -22,7 +23,10 @@ class SmartCar1Resources(Resource):
     def render_PUT(self, request):
         # Assuming the request payload is a dictionary
         self.location = geolocator.reverse(request.payload.get('location', self.location))
+        self.location = geolocator.reverse(request.payload.get('location', self.location))
         
+        if self.location.address.split(",")[4].strip()==ZONEA_NAME:
+            self.in_zone_a = True
         if self.location.address.split(",")[4].strip()==ZONEA_NAME:
             self.in_zone_a = True
             self.update_resdir2(self.in_zone_a)
