@@ -5,7 +5,7 @@ from pymongo import MongoClient
 client = MongoClient("mongodb://localhost:27017/")
 
 # Create or access a database called 'mydatabase'.
-db = client['mydatabase'] 
+db = client['IoT project'] 
 
 # Create or access a collection for cars and buses.
 car_collection = db['cars']
