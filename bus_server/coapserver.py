@@ -19,7 +19,7 @@ def usage():  # pragma: no cover
 
 
 def main(argv):  # pragma: no cover
-    ip = "0.0.0.0"
+    ip = "127.0.0.1"
     port = 5683
     multicast = False
     try:
