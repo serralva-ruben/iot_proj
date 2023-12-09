@@ -17,11 +17,10 @@ class SmartBus13Resources(Resource):
 
     def render_PUT(self, request):
         # Assuming the request payload is a dictionary
-        self.location = request.payload.get('location', self.location)
-        new_in_zone_a = request.payload.get('in_zone_a', self.in_zone_a)
+        self.location = geolocator.reverse(request.payload.get('location', self.location))
         
-        if new_in_zone_a != self.in_zone_a:
-            self.in_zone_a = new_in_zone_a
+        if self.location.address.split(",")[4].strip()==ZONEA_NAME:
+            self.in_zone_a = True
             self.update_resdir2(self.in_zone_a)
 
         self.payload = f"Updated Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
@@ -33,13 +32,10 @@ class SmartBus13Resources(Resource):
                 "vehicle_id": self.name,
                 "location": self.location,
             }
-            # URL of the ResDir2 registration endpoint
-            resdir2_url = "http://127.0.0.1:5000/register"
+
             try:
-                response = requests.put(resdir2_url, json=registration_data)
-                if response.status_code == 200:
-                    print(f"Successfully registered {self.name} to ResDir2")
-                else:
-                    print(f"Failed to register {self.name} to ResDir2: {response.text}")
-            except requests.RequestException as e:
+                client = HelperClient(server=('127.0.0.1', 5685))
+                client.put("register", payload=str(registration_data), timeout=10)
+
+            except Exception as e:
                 print(f"Error communicating with ResDir2: {e}")
