@@ -1,4 +1,5 @@
 from coapthon.resources.resource import Resource
+from coapthon.client.helperclient import HelperClient
 import requests
 
 ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates

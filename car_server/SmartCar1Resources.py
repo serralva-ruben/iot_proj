@@ -1,5 +1,7 @@
 from coapthon.resources.resource import Resource
-from math import radians, cos, sin, sqrt, atan2
+from geopy.geocoders import Nominatim
+from coapthon.client.helperclient import HelperClient
+import requests
 
 ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates
 ZONEA_RADIUS = 5 #km
