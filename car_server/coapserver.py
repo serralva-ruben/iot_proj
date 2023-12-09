@@ -1,12 +1,12 @@
 import getopt
 import sys
 from coapthon.server.coap import CoAP
-from SmartCar1Resource import SmartCar1Resource
+from SmartCar1Resources import SmartCar1Resources
 
 class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
         CoAP.__init__(self, (host, port), multicast)
-        self.add_resource('SmartCar1/', SmartCar1Resource(1))
+        self.add_resource('SmartCar1/', SmartCar1Resources(1))
         
         print("CoAP Server start on " + host + ":" + str(port))
         print(self.root.dump())
