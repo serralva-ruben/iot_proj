@@ -1,5 +1,6 @@
 from coapthon.resources.resource import Resource
 from geopy.geocoders import Nominatim
+from coapthon.client.helperclient import HelperClient
 import requests
 
 ZONEA_NAME = 'Canton Luxembourg'

@@ -1,4 +1,5 @@
 from coapthon.resources.resource import Resource
+from coapthon.client.helperclient import HelperClient
 import requests
 
 class SmartBus13Resources(Resource):
