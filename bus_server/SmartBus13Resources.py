@@ -1,12 +1,13 @@
 import json
 from math import atan2, cos, radians, sin, sqrt
+import certifi
 import paho.mqtt.publish as publish
 from coapthon.resources.resource import Resource
 from coapthon.client.helperclient import HelperClient
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 from pymongo.errors import ConnectionFailure, PyMongoError
 import time
-import ssl
 
 ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates (Luxembourg ville)
 ZONEA_RADIUS = 15 #km
@@ -14,7 +15,6 @@ ZONEA_RADIUS = 15 #km
 class SmartBus13Resources(Resource):
     def __init__(self, name="SmartBus13Resource", coap_server=None):
         super(SmartBus13Resources, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
-        self.payload = "SmartBus13 Initial Data"
         self.resource_type = "SmartBus13Resource"
         self.content_type = "application/json"
         self.location = "Unknown"
@@ -23,7 +23,8 @@ class SmartBus13Resources(Resource):
 
     def initialize_mongo_client(self):
         try:
-            client = MongoClient("mongodb+srv://ruben:123@cluster0.mvvn0gh.mongodb.net/")
+            uri = "mongodb+srv://ruben:1234@cluster0.dlovykt.mongodb.net/?retryWrites=true&w=majority"
+            client = MongoClient(uri, server_api=ServerApi('1'), tlsCAFile=certifi.where())
             # Test connection
             client.admin.command('ping')
             print("Connected to MongoDB successfully!")

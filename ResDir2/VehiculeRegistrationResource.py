@@ -28,7 +28,7 @@ class VehicleRegistrationResource(Resource):
 
             # MQTT Notification
             mqtt_topic = "vehicles/zone_a"
-            mqtt_message = json.dumps({"vehicle_id": vehicle_id, "status": "entered_zone_a", "location": location})
+            mqtt_message = json.dumps({"vehicle_id": vehicle_id, "status": "entered_zone_a"})
             publish.single(mqtt_topic, payload=mqtt_message, hostname="localhost")
 
             self.payload = json.dumps({"message": f"Vehicle {vehicle_id} registered successfully"})

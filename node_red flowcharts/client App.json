@@ -2,7 +2,7 @@
     {
         "id": "1eec653543fe5e07",
         "type": "tab",
-        "label": "client",
+        "label": "App client",
         "disabled": false,
         "info": "",
         "env": []
@@ -51,7 +51,7 @@
         "type": "function",
         "z": "1eec653543fe5e07",
         "name": "function_check_if_bus",
-        "func": "if (msg.payload.vehicle_id === \"SmartBus13\" && msg.payload.status === \"entered_zone_a\") {\n    // Set a flag or topic in flow or global context\n    flow.set(\"processBusUpdates\", true);\n}\n",
+        "func": "if (msg.payload.vehicle_id === \"SmartBus13\" && msg.payload.status === \"entered_zone_a\") {\n    //if the notification comes from the bus it means the bus entered the are\n    //set processBusUpdates to true so that it starts listening to the location messages\n    flow.set(\"processBusUpdates\", true);\n}\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -72,7 +72,7 @@
         "topic": "bus13/location",
         "qos": "0",
         "datatype": "auto-detect",
-        "broker": "7a5b8ded92fa4294",
+        "broker": "7e35b04f4fe2342f",
         "nl": false,
         "rap": true,
         "rh": 0,
@@ -90,7 +90,7 @@
         "type": "function",
         "z": "1eec653543fe5e07",
         "name": "function_process_bus_updates",
-        "func": "let processBusUpdates = flow.get(\"processBusUpdates\") || false;\nif (processBusUpdates) {\n    let busData = msg.payload;  // Assuming payload is a JSON object with name and location\n    let displayText = `Bus Name: ${busData.name}\\nLocation: ${busData.location}`;\n\n    // Create a new message for the dashboard node\n    let newMsg = {\n    payload: displayText\n    };\n\nreturn newMsg;\n\n} else {\n    // Ignore the message\n    return null; // stops the message from being processed further\n}\n",
+        "func": "if (flow.get(\"processBusUpdates\")) {\n    let busData = msg.payload;\n    //return a string containing the location to be shown in the dashboard\n    return {payload: \"Lat: \"+JSON.parse(busData.location).lat.toFixed(4)+\" Lon: \"+JSON.parse(busData.location).lon.toFixed(4)}; \n} \n//if processBusUpdates if false we just send a message saying\n//that the client is not subcribed to the bus\nelse { return {payload: 'not subscribed'};}\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -101,7 +101,8 @@
         "y": 600,
         "wires": [
             [
-                "4d351f5dc2538fc6"
+                "4d351f5dc2538fc6",
+                "4d0528781001e2a0"
             ]
         ]
     },
@@ -111,20 +112,80 @@
         "z": "1eec653543fe5e07",
         "group": "b41ad1984d6d19c9",
         "order": 1,
-        "width": 0,
-        "height": 0,
+        "width": "6",
+        "height": "2",
         "name": "Result_text",
-        "label": "text",
+        "label": "Bus location:",
         "format": "{{msg.payload}}",
-        "layout": "row-spread",
+        "layout": "col-center",
         "className": "",
         "style": false,
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 910,
+        "x": 1070,
         "y": 720,
         "wires": []
+    },
+    {
+        "id": "4d0528781001e2a0",
+        "type": "debug",
+        "z": "1eec653543fe5e07",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1120,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "24c08d4be3f18878",
+        "type": "inject",
+        "z": "1eec653543fe5e07",
+        "name": "run once in the beginning",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 140,
+        "wires": [
+            [
+                "4d8addef46189e70"
+            ]
+        ]
+    },
+    {
+        "id": "4d8addef46189e70",
+        "type": "function",
+        "z": "1eec653543fe5e07",
+        "name": "set processBusUpdates to false",
+        "func": "flow.set(\"processBusUpdates\", false);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 80,
+        "wires": [
+            []
+        ]
     },
     {
         "id": "7a5b8ded92fa4294",
@@ -158,9 +219,40 @@
         "sessionExpiry": ""
     },
     {
+        "id": "7e35b04f4fe2342f",
+        "type": "mqtt-broker",
+        "name": "App to bus server broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
         "id": "b41ad1984d6d19c9",
         "type": "ui_group",
-        "name": "Map_dashboard_group",
+        "name": "worldmap",
         "tab": "c53401d6c70334a7",
         "order": 1,
         "disp": true,
@@ -171,7 +263,7 @@
     {
         "id": "c53401d6c70334a7",
         "type": "ui_tab",
-        "name": "Map_dashboard_tab",
+        "name": "worldmap",
         "icon": "dashboard",
         "disabled": false,
         "hidden": false
