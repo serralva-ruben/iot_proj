@@ -1,9 +1,12 @@
 # iot_proj
 
-Adin Suljkanovic 
-Eldar Memikj
-Ruben Serralva
-Youngsub Lee
+-Adin Suljkanovic
+
+-Eldar Memikj
+
+-Ruben Serralva
+
+-Youngsub Lee
 
 In this file we are going to explain how the project works.
 
@@ -29,7 +32,7 @@ Then the part that the car server differs from the bus server is that the bus se
 **Now we can talk about the resdir2** 
 
 It is also a coap server implemented in python using coapthon, it has a VehicleRegistrationResource stored inside VehiculeRegistrationResource.py.
-This resource can receive a put request to register a vehicle, it will first load the data of the request (containing the vehicle to register data) then it will add a timestamp to the data and add it to the vehicle_registrations dictionnary, since the key is the vehicle id and in this exercise the vehicle id (or the name) is always the same (SmartBus13 for the bus and SmartCar1 for the car), this means that in the case of the vehicle being already registered, it will just update its data (like location) instead of adding a new entry to the dictionnary.
+This resource can receive a put request to register a vehicle, it will first load the data of the request (containing the vehicle to register data), then it will create a timestamp which will be used as the key in our dictionnary, the value of the entry is the vehicle data, after registering the vehicle in the dictionary, the function cleanup_registrations will be called, this function will go over every key in the dictionary and delete those that are older than 10 minutes (600 seconds).
 Then it will publish a message over mqtt to the topic "vehicles/zone_a" saying that the vehicle entered the zone A (since in order for the resdir to receive a put request it means that the vehicle entered the zone in first place) and this message will be received by the App client so that it is notified that the vehicle entered the zone A.
 
 **App Client flow chart**
