@@ -22,11 +22,10 @@ class VehicleRegistrationResource(Resource):
             if not vehicle_id or not location:
                 return self
 
-            # Add a timestamp to the registration data
             data['timestamp'] = time.time()
             self.vehicle_registrations[vehicle_id] = data
 
-            # MQTT Notification
+            # send mqtt message to client notifying that the vehicle entered the zone A
             mqtt_topic = "vehicles/zone_a"
             mqtt_message = json.dumps({"vehicle_id": vehicle_id, "status": "entered_zone_a"})
             publish.single(mqtt_topic, payload=mqtt_message, hostname="localhost")

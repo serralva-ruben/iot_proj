@@ -13,10 +13,8 @@ class CoAPServer(CoAP):
         print("CoAP Server start on " + host + ":" + str(port))
         print(self.root.dump())
 
-
 def usage():  # pragma: no cover
     print("coapserver.py -i <ip address> -p <port>")
-
 
 def main(argv):  # pragma: no cover
     ip = "127.0.0.1"

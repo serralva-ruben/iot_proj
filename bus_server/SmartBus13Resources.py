@@ -21,11 +21,11 @@ class SmartBus13Resources(Resource):
         self.in_zone_a = False
         self.mongo_client = self.initialize_mongo_client()
 
+    #connect to mongo database
     def initialize_mongo_client(self):
         try:
             uri = "mongodb+srv://ruben:1234@cluster0.dlovykt.mongodb.net/?retryWrites=true&w=majority"
             client = MongoClient(uri, server_api=ServerApi('1'), tlsCAFile=certifi.where())
-            # Test connection
             client.admin.command('ping')
             print("Connected to MongoDB successfully!")
             return client
@@ -49,6 +49,7 @@ class SmartBus13Resources(Resource):
         self.name = request_payload["name"]
         self.location = {'lat':request_payload['lat'],'lon':request_payload['lon']}
         #register bus data inside mongo database
+        #if there's a connection to a mongo database we insert the object into the bus collection
         if self.mongo_client:
             try:
                 db = self.mongo_client['iot']
@@ -64,7 +65,7 @@ class SmartBus13Resources(Resource):
         else:
             self.in_zone_a = False
 
-        # send mqtt message with bus location
+        # send mqtt message with bus location (which will go to the App client once it starts subscribing, and will then appear in the node red dashboard)
         mqtt_topic = "bus13/location"
         mqtt_message = json.dumps({"name": self.name, "status": "entered_zone_a", "location": json.dumps(self.location)})
         publish.single(mqtt_topic, payload=mqtt_message, hostname="localhost")
@@ -77,11 +78,9 @@ class SmartBus13Resources(Resource):
                 "vehicle_id": self.name,
                 "location": self.location,
             }
-
             try:
-                # Convert the registration data to a JSON string
+                #send a put request to the resdir to register the vehicle since it entered the zone A
                 registration_data_json = json.dumps(registration_data)
-
                 client = HelperClient(server=('127.0.0.1', 5685))
                 response = client.put("register", payload=registration_data_json, timeout=10)
                 print(f"Response from ResDir2: {response.pretty_print()}")
@@ -89,6 +88,7 @@ class SmartBus13Resources(Resource):
             except Exception as e:
                 print(f"Error communicating with ResDir2: {e}")
 
+#calculate wether vehicle is inside the area
 def is_inside_area(location, area_center, radius):
     R = 6371.0 #radius of earch in km
 
