@@ -22,8 +22,11 @@ class VehicleRegistrationResource(Resource):
             if not vehicle_id or not location:
                 return self
 
-            data['timestamp'] = time.time()
-            self.vehicle_registrations[vehicle_id] = data
+            current_time = time.time()
+            data['timestamp'] = current_time
+            self.vehicle_registrations[current_time] = data
+
+            self.cleanup_registrations(current_time)
 
             # send mqtt message to client notifying that the vehicle entered the zone A
             mqtt_topic = "vehicles/zone_a"
