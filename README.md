@@ -29,10 +29,6 @@ Then it will publish a message over mqtt to the topic "vehicles/zone_a" saying t
 
 ***Bullet points Overview***
 
-**IoT Smart Vehicle Tracking System**
-
-This system tracks the locations of a smart car and smart bus in Luxembourg using IoT technologies. It visually displays vehicle locations on a map and sends notifications when vehicles enter a predefined Zone A. 
-
 **Functionality**
 
 The key functions are:
