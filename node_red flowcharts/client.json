@@ -1,0 +1,179 @@
+[
+    {
+        "id": "1eec653543fe5e07",
+        "type": "tab",
+        "label": "client",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f9da9a7a3dc74b62",
+        "type": "mqtt in",
+        "z": "1eec653543fe5e07",
+        "name": "mqtt_notification_from_ResDir",
+        "topic": "vehicles/zone_a",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "7a5b8ded92fa4294",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 320,
+        "y": 340,
+        "wires": [
+            [
+                "6fa8da684cf26f0b",
+                "5af835c2281a932d"
+            ]
+        ]
+    },
+    {
+        "id": "6fa8da684cf26f0b",
+        "type": "debug",
+        "z": "1eec653543fe5e07",
+        "name": "debug_notification_message",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "5af835c2281a932d",
+        "type": "function",
+        "z": "1eec653543fe5e07",
+        "name": "function_check_if_bus",
+        "func": "if (msg.payload.vehicle_id === \"SmartBus13\" && msg.payload.status === \"entered_zone_a\") {\n    // Set a flag or topic in flow or global context\n    flow.set(\"processBusUpdates\", true);\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2e0939b5297bcb07",
+        "type": "mqtt in",
+        "z": "1eec653543fe5e07",
+        "name": "mqtt_app_to_bus",
+        "topic": "bus13/location",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "7a5b8ded92fa4294",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 520,
+        "y": 600,
+        "wires": [
+            [
+                "9ca084cfd0558bf3"
+            ]
+        ]
+    },
+    {
+        "id": "9ca084cfd0558bf3",
+        "type": "function",
+        "z": "1eec653543fe5e07",
+        "name": "function_process_bus_updates",
+        "func": "let processBusUpdates = flow.get(\"processBusUpdates\") || false;\nif (processBusUpdates) {\n    let busData = msg.payload;  // Assuming payload is a JSON object with name and location\n    let displayText = `Bus Name: ${busData.name}\\nLocation: ${busData.location}`;\n\n    // Create a new message for the dashboard node\n    let newMsg = {\n    payload: displayText\n    };\n\nreturn newMsg;\n\n} else {\n    // Ignore the message\n    return null; // stops the message from being processed further\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 830,
+        "y": 600,
+        "wires": [
+            [
+                "4d351f5dc2538fc6"
+            ]
+        ]
+    },
+    {
+        "id": "4d351f5dc2538fc6",
+        "type": "ui_text",
+        "z": "1eec653543fe5e07",
+        "group": "b41ad1984d6d19c9",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Result_text",
+        "label": "text",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 910,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "7a5b8ded92fa4294",
+        "type": "mqtt-broker",
+        "name": "ResDir_to_App_broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "b41ad1984d6d19c9",
+        "type": "ui_group",
+        "name": "Map_dashboard_group",
+        "tab": "c53401d6c70334a7",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c53401d6c70334a7",
+        "type": "ui_tab",
+        "name": "Map_dashboard_tab",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
