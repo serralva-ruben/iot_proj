@@ -26,3 +26,53 @@ Then the part that the car server differs from the bus server is that the bus se
 It is also a coap server implemented in python using coapthon, it has a VehicleRegistrationResource stored inside VehiculeRegistrationResource.py.
 This resource can receive a put request to register a vehicle, it will first load the data of the request (containing the vehicle to register data) then it will add a timestamp to the data and add it to the vehicle_registrations dictionnary, since the key is the vehicle id and in this exercise the vehicle id (or the name) is always the same (SmartBus13 for the bus and SmartCar1 for the car), this means that in the case of the vehicle being already registered, it will just update its data (like location) instead of adding a new entry to the dictionnary.
 Then it will publish a message over mqtt to the topic "vehicles/zone_a" saying that the vehicle entered the zone A (since in order for the resdir to receive a put request it means that the vehicle entered the zone in first place) and this message will be received by the App client so that it is notified that the vehicle entered the zone A.
+
+***Bullet points Overview***
+
+**IoT Smart Vehicle Tracking System**
+
+This system tracks the locations of a smart car and smart bus in Luxembourg using IoT technologies. It visually displays vehicle locations on a map and sends notifications when vehicles enter a predefined Zone A. 
+
+**Functionality**
+
+The key functions are:
+
+- Simulate movement of vehicles and generate location data
+- Display real-time locations of vehicles on a map 
+- Define geofenced Zone A and detect when vehicles enter it
+- Send notifications when entries to Zone A occur, especially for the bus
+- Start tracking the bus once it enters Zone A
+- Store all vehicle location history in a database
+
+**Components**
+
+The main components leveraged are:
+
+- Node-RED: Front-end interface for data visualization and MQTT communication
+- Python CoAP Servers: Backend logic to process vehicle data 
+- MongoDB: Storage for vehicle location history
+- MQTT Protocol: Message passing between interfaces
+
+**Node-RED Workflows**
+
+The Node-RED flows support two key interfaces:
+
+1. Location Simulation and Map Display
+    - Randomly generates coordinate locations
+    - Sends locations to Python CoAP vehicle servers
+    - Displays vehicles on a Luxembourg map
+    
+2. Zone A Entry Notifications and Bus Tracking
+    - Listens for MQTT notifications of Zone A entries 
+    - Specifically tracks bus location after Zone A entry
+    - Displays real-time bus locations on interface
+
+**Information Flow**
+
+The overall workflow is:
+
+1. Random location generation 
+2. CoAP servers save locations, check Zone A, notify on entry
+3. MQTT triggers tracking when bus enters Zone A   
+4. Node-RED displays real-time bus locations
+5. All data saved to MongoDB
