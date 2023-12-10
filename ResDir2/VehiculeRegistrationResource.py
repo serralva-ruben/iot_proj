@@ -38,3 +38,9 @@ class VehicleRegistrationResource(Resource):
             self.payload = "Invalid JSON format"
 
         return self
+    
+    def cleanup_registrations(self, current_time):
+        ten_minutes_ago = current_time - 600  # 600 seconds = 10 minutes
+        keys_to_delete = [key for key, value in self.vehicle_registrations.items() if value['timestamp'] < ten_minutes_ago]
+        for key in keys_to_delete:
+            del self.vehicle_registrations[key]
