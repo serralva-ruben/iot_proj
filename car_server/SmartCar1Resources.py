@@ -4,8 +4,8 @@ from coapthon.client.helperclient import HelperClient
 import requests
 import json
 
-ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates
-ZONEA_RADIUS = 5 #km
+ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates (Luxembourg ville)
+ZONEA_RADIUS = 15 #km
 
 class SmartCar1Resources(Resource):
     def __init__(self, name="SmartCar1Resource", coap_server=None):
@@ -22,15 +22,15 @@ class SmartCar1Resources(Resource):
         return self
 
     def render_PUT(self, request):
-        # Parse the JSON string payload into a Python dictionary
         try:
             request_payload = json.loads(request.payload)
         except json.JSONDecodeError:
-            # Handle the exception if the payload is not a valid JSON
             return self
+
+        print(request_payload)
         
         self.name = request_payload["name"]
-        self.location = {'lat':request_payload["lat"],'lon':request_payload['lon']}
+        self.location = {'lat':request_payload['lat'],'lon':request_payload['lon']}
         
         if is_inside_area(self.location, ZONEA_Center, ZONEA_RADIUS):
             self.in_zone_a = True

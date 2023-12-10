@@ -1,0 +1,232 @@
+[
+    {
+        "id": "a5d515fc3f95f6c6",
+        "type": "tab",
+        "label": "car+bus+map",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "aabddc3f984cb0a1",
+        "type": "inject",
+        "z": "a5d515fc3f95f6c6",
+        "name": "Update_location",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 330,
+        "y": 400,
+        "wires": [
+            [
+                "b19a6ef6c08c883f"
+            ]
+        ]
+    },
+    {
+        "id": "b19a6ef6c08c883f",
+        "type": "function",
+        "z": "a5d515fc3f95f6c6",
+        "name": "Random_location",
+        "func": "function randomCoordinate(min, max) {\n    return Math.random() * (max - min) + min;\n}\n\n// Randomly place the car within Luxembourg's boundaries\nlet carLat = randomCoordinate(49.447, 50.182); // Latitude range\nlet carLon = randomCoordinate(5.819, 6.529);   // Longitude range\n\n// Randomly place the bus within Luxembourg's boundaries\nlet busLat = randomCoordinate(49.447, 50.182); // Latitude range\nlet busLon = randomCoordinate(5.819, 6.529);   // Longitude range\n\n// Zone A around Luxembourg City Center\nlet zoneALat = 49.611621; // Luxembourg City Center Latitude\nlet zoneALon = 6.131935;  // Luxembourg City Center Longitude\nlet zoneARadius = 15000;  // 15 km radius\n\n// Create payload for the worldmap\nmsg.payload = [\n    {\n        \"name\": \"SmartCar1\",\n        \"lat\": carLat,\n        \"lon\": carLon,\n        \"icon\": \"car\",\n        \"iconColor\": \"blue\"\n    },\n    {\n        \"name\": \"SmartBus13\",\n        \"lat\": busLat,\n        \"lon\": busLon,\n        \"icon\": \"bus\",\n        \"iconColor\": \"red\"\n    },\n    {\n        \"name\": \"ZoneA\",\n        \"lat\": zoneALat,\n        \"lon\": zoneALon,\n        \"radius\": zoneARadius,\n        \"layer\": \"drawing\",\n        \"icon\": \"circle\",\n        \"iconColor\": \"#00FF00\" // Green circle\n    }\n];\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 400,
+        "wires": [
+            [
+                "0517ef4da136c378",
+                "d1734e0dcb64e8e0",
+                "fbb73b94ca02cc32"
+            ]
+        ]
+    },
+    {
+        "id": "0517ef4da136c378",
+        "type": "ui_worldmap",
+        "z": "a5d515fc3f95f6c6",
+        "group": "b41ad1984d6d19c9",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Luxembourg_map",
+        "lat": "49.6616",
+        "lon": "6.1319",
+        "zoom": "9",
+        "layer": "OSMG",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "hide",
+        "layers": "hide",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "true",
+        "coords": "none",
+        "showgrid": "false",
+        "showruler": "false",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN,HM",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriDG,UKOS",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 850,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "e88d915b8f76a1dc",
+        "type": "coap request",
+        "z": "a5d515fc3f95f6c6",
+        "method": "PUT",
+        "confirmable": true,
+        "observe": false,
+        "multicast": false,
+        "multicastTimeout": 20000,
+        "url": "coap://127.0.0.1:5684/SmartCar1",
+        "content-format": "application/json",
+        "raw-buffer": false,
+        "name": "coap_car_request",
+        "x": 670,
+        "y": 280,
+        "wires": [
+            [
+                "5d0f8729a295c6c5"
+            ]
+        ]
+    },
+    {
+        "id": "b38af93519f53185",
+        "type": "coap request",
+        "z": "a5d515fc3f95f6c6",
+        "method": "PUT",
+        "confirmable": true,
+        "observe": false,
+        "multicast": false,
+        "multicastTimeout": 20000,
+        "url": "coap://127.0.0.1:5683/SmartBus1",
+        "content-format": "application/json",
+        "raw-buffer": false,
+        "name": "coap_bus_request",
+        "x": 670,
+        "y": 540,
+        "wires": [
+            [
+                "909f0482682ef96f"
+            ]
+        ]
+    },
+    {
+        "id": "5d0f8729a295c6c5",
+        "type": "debug",
+        "z": "a5d515fc3f95f6c6",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 880,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "909f0482682ef96f",
+        "type": "debug",
+        "z": "a5d515fc3f95f6c6",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "d1734e0dcb64e8e0",
+        "type": "function",
+        "z": "a5d515fc3f95f6c6",
+        "name": "filter function",
+        "func": "return { payload: msg.payload.find(i => i.name === \"SmartBus13\") };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 540,
+        "wires": [
+            [
+                "b38af93519f53185"
+            ]
+        ]
+    },
+    {
+        "id": "fbb73b94ca02cc32",
+        "type": "function",
+        "z": "a5d515fc3f95f6c6",
+        "name": "filter functions",
+        "func": "return { payload: msg.payload.find(i => i.name === \"SmartCar1\") };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 280,
+        "wires": [
+            [
+                "e88d915b8f76a1dc"
+            ]
+        ]
+    },
+    {
+        "id": "b41ad1984d6d19c9",
+        "type": "ui_group",
+        "name": "Map_dashboard_group",
+        "tab": "c53401d6c70334a7",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c53401d6c70334a7",
+        "type": "ui_tab",
+        "name": "Map_dashboard_tab",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]

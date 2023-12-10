@@ -12,6 +12,8 @@ class VehicleRegistrationResource(Resource):
         self.vehicle_registrations = {}
 
     def render_PUT(self, request):
+        print(self.vehicle_registrations)
+        print('registering')
         try:
             data = json.loads(request.payload)
             vehicle_id = data.get('vehicle_id')
