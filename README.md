@@ -1,5 +1,10 @@
 # iot_proj
 
+Adin Suljkanovic 
+Eldar Memikj
+Ruben Serralva
+Youngsub Lee
+
 In this file we are going to explain how the project works.
 
 **Lets start from the flow car+bus+map as it should simulate the bus and the car driving around the map.**
@@ -18,7 +23,7 @@ The coapserver.py launches the server.
 Then we have SmartBus13Resources.py and SmartCar1Resources.py, these two files have the resources for the bus and the car respectively.
 In these two in the contructor first we try to connect to the mongo database by calling the method initialize_mongo_client from the constructor, then we have a function for a PUT request, in this function first we load the data from the request sent by our node_red flow chart, then we set the name and location of the resource, then we try to insert a document inside the respective mongo collection containing this data (name, location and a timestamp).
 Then we check wether the vehicle in question was inside the area, this is done using the is_inside_area function, which will take the location of the vehicle, the center of the zone and the radius of the zone as parameters, then it will calculate there the vehicle is inside by using the Haversine Formula, this way we can know the distance from the vehicle and the center of the area and check wether it is inferior or equal to the radius, and return true or false based on that check.
-Then if it is inside the zone a then we set in_zone_a to true and we call update_resdir2 which will send a put request to the resdir2 in order to register the vehicle (or update the location in case the vehicle is already registered), otherwise it will set in_zone_a to false.
+Then if it is inside the zone a then we set in_zone_a to true and we call update_resdir2 which will send a put request to the resdir2 in order to register the vehicle, otherwise it will set in_zone_a to false.
 Then the part that the car server differs from the bus server is that the bus server will always publish a mqtt message with the name and location of the bus to the topic "bus13/location" while the car won't.
 
 **Now we can talk about the resdir2** 
@@ -26,6 +31,12 @@ Then the part that the car server differs from the bus server is that the bus se
 It is also a coap server implemented in python using coapthon, it has a VehicleRegistrationResource stored inside VehiculeRegistrationResource.py.
 This resource can receive a put request to register a vehicle, it will first load the data of the request (containing the vehicle to register data) then it will add a timestamp to the data and add it to the vehicle_registrations dictionnary, since the key is the vehicle id and in this exercise the vehicle id (or the name) is always the same (SmartBus13 for the bus and SmartCar1 for the car), this means that in the case of the vehicle being already registered, it will just update its data (like location) instead of adding a new entry to the dictionnary.
 Then it will publish a message over mqtt to the topic "vehicles/zone_a" saying that the vehicle entered the zone A (since in order for the resdir to receive a put request it means that the vehicle entered the zone in first place) and this message will be received by the App client so that it is notified that the vehicle entered the zone A.
+
+**App Client flow chart**
+
+Now we are going to talk about the App client flow chart, first we have a mqtt in node, the purpose of this node is to receive the messages published by the ResDir2, these messages are the notifications saying that a vehicle entered the zoneA, then connected to this node we have a debug node and a function, the purpose of this function is to check wether the message has the vehicle_id "SmartBus13" and we also perform an additional check to see if it contains status of "entered_zone_a", if this is true we set "processBusUpdates" to true.
+We also want to make sure that "processBusUpdates" is always set to false in the beginning, this is why we have an inject note that launches a function that sets "processBusUpdates" to false in the beginning.
+Then we have a mqtt in node that will listen to the location of the bus that is connected to a function, if the bus entered the zone "processBusUpdates" will be true, so in this function we check "processBusUpdates", and if it is true we take the location received from our mqtt in node and we send as a payload a message containing the latitude and longitude of the bus, otherwise if "processBusUpdates" is false it means the bus hasn't entered the zone A yet and because of this we send a message saying "not subscribed", then this node is connected to a text node, its purpose if to show the location of the bus in the dashboard ui in the event of the bus entering the zone A and we subscribing to its location.
 
 ***Bullet points Overview***
 
