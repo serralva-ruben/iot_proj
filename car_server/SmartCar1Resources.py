@@ -29,8 +29,8 @@ class SmartCar1Resources(Resource):
             # Handle the exception if the payload is not a valid JSON
             return self
         
-        self.name = request_payload.get('name', self.name)
-        self.location = request_payload.get('location', self.location)
+        self.name = request_payload["name"]
+        self.location = {'lat':request_payload["lat"],'lon':request_payload['lon']}
         
         if is_inside_area(self.location, ZONEA_Center, ZONEA_RADIUS):
             self.in_zone_a = True
@@ -63,8 +63,8 @@ class SmartCar1Resources(Resource):
 def is_inside_area(location, area_center, radius):
     R = 6371.0
 
-    lat1 = radians(location[0])
-    lon1 = radians(location[1])
+    lat1 = radians(location["lat"])
+    lon1 = radians(location["lon"])
     lat2 = radians(area_center[0])
     lon2 = radians(area_center[1])
 
