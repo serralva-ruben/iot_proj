@@ -3,7 +3,10 @@ from math import atan2, cos, radians, sin, sqrt
 import paho.mqtt.publish as publish
 from coapthon.resources.resource import Resource
 from coapthon.client.helperclient import HelperClient
-import requests
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, PyMongoError
+import time
+import ssl
 
 ZONEA_Center = (49.612721712187586, 6.128316949370724) #ZONEA center coordinates (Luxembourg ville)
 ZONEA_RADIUS = 15 #km
@@ -16,30 +19,51 @@ class SmartBus13Resources(Resource):
         self.content_type = "application/json"
         self.location = "Unknown"
         self.in_zone_a = False
+        self.mongo_client = self.initialize_mongo_client()
+
+    def initialize_mongo_client(self):
+        try:
+            client = MongoClient("mongodb+srv://ruben:123@cluster0.mvvn0gh.mongodb.net/")
+            # Test connection
+            client.admin.command('ping')
+            print("Connected to MongoDB successfully!")
+            return client
+        except ConnectionFailure as e:
+            print(f"Could not connect to MongoDB: {e}")
+            return None
 
     def render_GET(self, request):
-        # Return the current state of the bus
         self.payload = f"Location: {self.location}, In Zone A: {'Yes' if self.in_zone_a else 'No'}"
         return self
 
     def render_PUT(self, request):
+        #converting request data from string to json
         try:
             request_payload = json.loads(request.payload)
         except json.JSONDecodeError:
             return self
-
-        print(request_payload)
-
+        #print statement for debugging purposes
+        print(f"payload: {request_payload}")
+        #setting the attributes of the resource with the current bus data (name and location)
         self.name = request_payload["name"]
         self.location = {'lat':request_payload['lat'],'lon':request_payload['lon']}
-        
+        #register bus data inside mongo database
+        if self.mongo_client:
+            try:
+                db = self.mongo_client['iot']
+                collection = db['bus']
+                data = {'name': self.name, 'location': self.location, 'timestamp': time.time()}
+                collection.insert_one(data)
+            except PyMongoError as e:
+                print(f"MongoDB operation failed: {e}")
+        #check wether bus is inside the are, if it is we call the 'update_resdit2' function and set in_zone_a to true, other wise to false
         if is_inside_area(self.location, ZONEA_Center, ZONEA_RADIUS):
             self.in_zone_a = True
             self.update_resdir2(self.in_zone_a)
         else:
             self.in_zone_a = False
 
-        # MQTT Notification
+        # send mqtt message with bus location
         mqtt_topic = "bus13/location"
         mqtt_message = json.dumps({"name": self.name, "status": "entered_zone_a", "location": json.dumps(self.location)})
         publish.single(mqtt_topic, payload=mqtt_message, hostname="localhost")
@@ -65,7 +89,7 @@ class SmartBus13Resources(Resource):
                 print(f"Error communicating with ResDir2: {e}")
 
 def is_inside_area(location, area_center, radius):
-    R = 6371.0
+    R = 6371.0 #radius of earch in km
 
     lat1 = radians(location["lat"])
     lon1 = radians(location["lon"])

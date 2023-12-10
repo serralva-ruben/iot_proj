@@ -61,7 +61,7 @@ class SmartCar1Resources(Resource):
                 print(f"Error communicating with ResDir2: {e}")
 
 def is_inside_area(location, area_center, radius):
-    R = 6371.0
+    R = 6371.0 #radius of earch in km
 
     lat1 = radians(location["lat"])
     lon1 = radians(location["lon"])
