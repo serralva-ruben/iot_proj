@@ -41,7 +41,7 @@ class SmartBus13Resources(Resource):
 
         # MQTT Notification
         mqtt_topic = "bus13/location"
-        mqtt_message = json.dumps({"name": self.name, "status": "entered_zone_a", "location": self.location})
+        mqtt_message = json.dumps({"name": self.name, "status": "entered_zone_a", "location": json.dumps(self.location)})
         publish.single(mqtt_topic, payload=mqtt_message, hostname="localhost")
 
         return self
